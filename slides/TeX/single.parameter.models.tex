@@ -1,0 +1,494 @@
+\documentclass{slides}
+\usepackage{xspace}
+
+
+\title[Bayesian Inference]{Bayesian Inference in Single Parameter Models}
+\author[Andrews]{Mark Andrews \& Thom Baguley}
+
+\begin{document}
+{
+	\begin{frame}
+		\titlepage
+	\end{frame}
+}
+
+
+\begin{frame}
+\frametitle{Inference in a Bernoulli Distribution}
+
+\begin{quotation} \ldots Polish mathematicians Tomasz Gliszczynski and
+	Waclaw Zawadowski\ldots spun a Belgian one euro coin 250 times,
+	and found it landed heads up 140 times \ldots When tossed 250
+	times, the one euro coin came up heads 139 times and tails 111.
+	\ldots 
+\end{quotation}
+
+\flushright{\emph{The Guardian}, January 4, 2002\footnote{ See
+	\texttt{http://bit.ly/1BOKu9b} for original story and
+	\texttt{http://bit.ly/1BOKx4Q} for discussion.}}
+
+	\begin{itemize}
+		\item A sample of $n=250$ coin tosses can be modelled as $n$ independent and identically dsibution Bernoulli random variables with parameter $\theta$.
+		\item In other words, our probabilitic model is
+			\[
+				x_i \sim \textrm{Bernoulli}(\theta),\quad\text{for $i \in \{1,2\ldots n\}$.}
+			\]
+			and we would like to inference the probable values of $\theta$ given an observation of $m=139$ (or $m=140$, etc.).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Inference in a Bernoulli Distribution}
+	\begin{itemize}
+		\item The likelihood of the observed outcomes of the $n$ coins is
+			\begin{align*}
+				\Prob{x_1, x_2\cdots x_n \given \theta} &= \prod_{i=1}^n \Prob{x_i \given \theta},\\
+				& = \prod_{i=1}^n \theta^{x_i} (1-\theta)^{1-x_i},\\
+				& = \theta^{m} (1-\theta)^{n-m}.
+				\label{eq:bernoulli-likelihood}
+			\end{align*}
+		\item This is identical to a binomial distribution likelihood function.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Inference in a Bernoulli Distribution}
+	\input{binomial.likelihood}
+		The likelihood function for $n=250$ and $m=139$.
+\end{frame}
+\begin{frame}
+	\frametitle{Inference in a Bernoulli Distribution}
+	\begin{itemize}
+		\item The probabilistic generative model of the Euro coin toss data is as follows:
+			\begin{itemize}
+				\item The coin's bias corresponds to the fixed but unknown value of the parameter $\theta$ of a Bernoulli random variable.
+				\item The observed outcomes $x_1, x_2 \cdots x_n$ are $n$ iid samples from $\textrm{Bernoulli}(\theta)$.
+			\end{itemize}
+		\item This generative model can be extended by assuming that $\theta$ is itself drawn from a prior distribution $\Prob{\theta}$:
+			\begin{align*}
+				\theta &\sim \Prob{\theta},\\
+				x_i &\sim \textrm{Bernoulli}(\theta),\quad\text{for $i \in \{1,2\ldots n\}$.}
+			\end{align*}
+		\item In other words, we assume that a value for $\theta$ was randomly drawn from $\Prob{\theta}$ and then $n$ binary variables were sampled from $\textrm{Bernoulli}(\theta)$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Conjugate Priors}
+	\begin{itemize}
+		\item For a given likelihood function, a \emph{conjugate prior} distribution is a prior probability distribution that leads to a posterior distribution of the same parameteric family.
+		\item Using conjugate priors allows Bayesian inference and other probabilistic calculations to be performed analytically.
+		\item Only a small subset of probabilistic models have conjugate priors.
+		\item However, conjugate priors play a vital role in Monte Carlo methods like Gibbs sampling even in complex models.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{The beta distribution}
+	\begin{itemize}
+		\item For the binomial likelihood function
+\[
+	\theta^m (1-\theta)^{n-m}	
+\]
+a conjugate prior is the beta distribution
+\[
+	\textrm{Beta}(\theta \given \alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \theta^{\alpha-1}(1 - \theta)^{\beta-1}.
+\]
+\item The \emph{normalizing constant} term is
+	\[
+		\frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} = \frac{1}{B(\alpha,\beta)},
+	\]
+	where $B(\alpha,\beta)$ is the beta function:
+	\[
+		B(\alpha,\beta) = \int \theta^\alpha (1-\theta)^{\beta-1}\ d\theta.
+	\]
+	\end{itemize}
+\end{frame}
+\begin{frame}
+	\frametitle{The beta distribution}
+	\input{beta.3.5.distribution}
+	The beta distribution with $\alpha=3$ and $\beta=5$.
+\end{frame}
+\begin{frame}
+	\frametitle{Posterior distribution}
+	\begin{itemize}
+		\item Denoting the observed data by $D = (n, m)$, with the beta prior, the posterior distribution is 
+
+		\begin{align*}
+			\Prob{\theta\given D, \alpha,\beta} &= \frac{\Prob{D\given\theta}\Prob{\theta\given\alpha,\beta}}{\int\Prob{D\given\theta}\Prob{\theta\given\alpha,\beta}\ d\theta},\\
+			&\propto \overbrace{\theta^{m} (1-\theta)^{n-m}}^{\text{likelihood}} \times \overbrace{\theta^{\alpha-1}(1 - \theta)^{\beta-1}}^{\text{prior}},\\
+			&\propto \theta^{m + \alpha-1}(1 - \theta)^{n-m+\beta-1},\\
+			&= \textrm{Beta}(m + \alpha, n - m + \beta).
+		\end{align*}
+		where the normalizing constant is the reciprocal of the beta function 
+		\begin{align*}
+			\frac{\Gamma(m + \alpha)\Gamma(n - m + \beta)}{\Gamma(n + \alpha+\beta)} &= \int \theta^{\alpha + m - 1} (1-\theta)^{ \beta + n - m - 1}\ d\theta.\\
+			&=B(\alpha + m, \beta + n - m).
+		\end{align*}
+
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Posterior distribution}
+	\begin{itemize}
+		\item For our Euro coin example, our observed data are $n=250$ and $m=139$.
+		\item A noninformative uniform prior on $\theta$ is $\textrm{Beta}(\alpha=1,\beta=1)$.
+		\item With this prior, the posterior distribution is 
+			\begin{align*}
+				\textrm{Beta}(m + \alpha, n - m + \beta) &= \textrm{Beta}(139 + 1, 250 - 139 + 1),\\
+				&= \textrm{Beta}(140, 112)
+			\end{align*}
+	\end{itemize}
+\end{frame}
+\begin{frame}
+	\frametitle{Posterior distribution}
+	\input{beta.140.112.distribution}
+	The posterior distribution when $n=250$, $m=139$, $\alpha=1$ and $\beta=1$.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Summarizing the posterior distribution}
+	\begin{itemize}
+		\item The mean, variance and modes of any beta distribution are as follows:
+			\begin{align*}
+				\langle \theta \rangle &=\frac{\alpha}{\alpha+\beta} ,\\
+				\mathrm{V}(\theta) &= \frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)},\\
+				\textrm{mode}(\theta) &= \frac{\alpha-1}{\alpha+\beta-2}.
+			\end{align*}
+		\item Thus, in our case of $\textrm{Beta}(140, 112)$, we have
+			\begin{align*}
+				\langle \theta \rangle &=  0.5556,\\
+				\mathrm{V}(\theta) &= 0.001, \quad\textrm{sd}(\theta) = 0.0312,\\
+				\textrm{mode}(\theta) &= 0.556.
+			\end{align*}
+
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{High posterior density (\hpd) intervals}
+	\begin{itemize}
+		\item \hpd intervals provide ranges that contain specified probability mass. For example, the 0.95 \hpd interval is the range of values that contain 0.95 of the probability mass of the distribution.
+		\item The $\varphi$ \hpd interval for the probability density function $\Prob{x}$ is computed by finding a probability density value $p^*$ such that 
+		\[
+			\Prob{\{x \colon \Prob{x} \geq p^*\}} = \varphi.
+		\]
+		\item In other words, we find the value $p^*$ such that the probability mass of the set of points whose density is greater than than $p^*$ is exactly $\varphi$. 
+		\item In general, the \hpd is not trivial to compute but in the case of symmetric distributions, it can be easily computed from the cumulative density function.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{The 0.95 \hpd interval}
+	\input{beta.140.112.hpd}
+	The posterior distribution, with its $0.95$ \hpd, when $n=250$, $m=139$, $\alpha=1$ and $\beta=1$. In this case, the \hpd interval is $(0.494, 0.617)$.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Posterior predictive distribution}
+
+	\begin{itemize}
+		\item Given that we have observed $m$ heads in $n$ coin tosses, what is the probability that the \emph{next} coin toss is heads.
+		\item This is given by the \emph{posterior predictive} probability that $x=1$:
+			\begin{align*}
+				\Prob{x=1\given D, \alpha, \beta} &= \int \Prob{x=1 \given \theta} \overbrace{\Prob{\theta\given D, \alpha, \beta}}^{\text{Posterior}}\ d\theta,\\
+				&= \int \theta \times \Prob{\theta\given D, \alpha, \beta} \ d\theta,\\
+				&= \left\langle \theta \right\rangle,\\
+				&= \frac{\alpha+m}{\alpha+\beta+n}.
+			\end{align*}
+		\item Thus, given 139 heads in 250 tosses, the predicted probability that the next coin will also be heads is $\approx 0.5556$.
+	\end{itemize}
+\end{frame}
+\begin{frame}
+	\frametitle{Marginal likelihood}	
+	\begin{itemize}
+		\item The posterior distribution is 
+		\[
+			\Prob{\theta\given D, \alpha,\beta}
+			= \frac{\overbrace{\Prob{D\given\theta}}^{\text{Likelihood}}\overbrace{\Prob{\theta\given\alpha,\beta}}^{\text{Prior}}}
+			{\underbrace{\int\Prob{D\given\theta}\Prob{\theta\given\alpha,\beta}\ d\theta}_{\text{Marginal likelihood}}}.
+		\]
+		where the \emph{marginal likelihood} gives the likelihood of the model given the observed data:
+		\[
+			\int\Prob{D\given\theta}\Prob{\theta\given\alpha,\beta}\ d\theta \defeq \Prob{D\given \alpha,\beta}.
+		\]
+	\item In this example, it has a simple analytical form:
+		\[
+			\Prob{D\given \alpha,\beta} = B(\alpha+m, \beta+n-m) = \frac{\Gamma(m + \alpha)\Gamma(n - m + \beta)}{\Gamma(n + \alpha+\beta)}.
+		\]
+
+
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Model comparison}
+	\begin{itemize}
+		\item Given $D$, we can compare the probability of model $M_1$ relative to model $M_0$ as follows:
+			\begin{align*}
+				\frac{\Prob{M_1\given D}}{\Prob{M_0\given D}} = 
+				\underbrace{\frac{\Prob{D\given M_1}}{\Prob{D\given M_0}}}_{\text{Bayes factor}} \times
+				\underbrace{\frac{\Prob{M_1}}{\Prob{M_0}}}_{\text{Priors odds}}. 
+			\end{align*}
+		\item When both models are equally probable a priori, then the relative posterior probabilities is determined by the Bayes factor.
+		\item We can compare our model $M_1$, i.e. with $\alpha = \beta = 1$, with the $M_0$ model that $\theta = \frac{1}{2}$.
+			\begin{align*}
+				\frac{\Prob{D\given M_1}}{\Prob{D\given M_0}} = \frac{
+				\int\Prob{D\given\theta}\Prob{\theta\given\alpha=1,\beta=1}\ d\theta 
+				}{
+					\int\Prob{D\given\theta} \delta(\theta-\frac{1}{2})\ d\theta.
+				}
+			\end{align*}
+
+		\item This effectively compares a model that assumes a
+			completely random coin machine, i.e., coin biases are
+			generated according to $\textrm{Beta}(\alpha=1,
+			\beta=1)$, to a completely perfect coin machine, i.e.,
+			coin biases are generated according to
+			$\delta(\theta-\frac{1}{2})$.  \end{itemize}
+
+	\end{frame} 
+	
+\begin{frame}
+	\frametitle{Model comparison}
+	\begin{itemize}
+		\item We can compare our model $M_1$, i.e. with $\alpha = \beta = 1$, with the $M_0$ model that $\theta = \frac{1}{2}$.
+			\begin{align*}
+				\frac{\Prob{D\given M_1}}{\Prob{D\given M_0}} &= \frac{
+				\int\Prob{D\given\theta}\Prob{\theta\given\alpha=1,\beta=1}\ d\theta 
+				}{
+					\int\Prob{D\given\theta} \delta(\theta-\frac{1}{2})\ d\theta.
+				},\\
+				&= \frac{\Gamma(\alpha+m)\Gamma(\beta+n-m)}{\Gamma(\alpha+\beta+n)} \Big/ \tfrac{1}{2}^m (1-\tfrac{1}{2})^{n-m},\\
+				&= \frac{m!(n-m)!}{(n+1)!} \big/ \tfrac{1}{2^n}.\\
+				\intertext{If $n=250$, $m=139$, then}
+				&= \frac{139!111!}{251!} \big/ \tfrac{1}{2^{250}} = 0.38.
+			\end{align*}
+		\item This is a factor of $2.65$ in favour of the unbiased coin hypothesis.
+		\item Note that the classical statistics null hypothesis test gives a p-value of $p=0.0875$.
+	\end{itemize}
+	\let\thefootnote\relax\footnote{If $n$ is a positive integer $\Gamma(n) = (n-1)!$.}
+	\end{frame}
+
+	\newcommand{\umax}{\lambda}
+	\begin{frame}
+		\frametitle{Inference of the Upper Bound of a Uniform Distribution}
+		\begin{itemize}
+
+			\item Given a sample of $K$ values from a uniform
+				distribution, bounded between 0 and $\umax$,
+				i.e.  \[x_1, x_2 \ldots x_K \sim
+				\textrm{Uniform}(0, \umax),\] what are the
+				probable values of $\umax$?
+
+			\item This is related to the \emph{German tank problem}
+				whereby the total number of German tanks being
+				produced during World War II was estimated from
+				the serial numbers of captured tanks.
+
+			\item In that problem, the tank serial numbers could be
+				treated like random samples (without
+				replacement) from a uniform distribution over
+				the integers from $0$ to $T$, where $T$ is the
+				total number of tanks.
+
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Likelihood function of the Upper Bound}
+		\begin{itemize}
+			\item The likelhood function over $\umax$ conditional on observations $x_1, x_2 \ldots x_K$ is
+				\[
+					\Prob{x_1, x_2 \ldots x_K \given \umax} = \prod_{k=1}^K \Prob{x_k \given \umax}
+					\]
+				where
+				\[\Prob{x_k \given \umax} 
+				= \begin{cases}
+					\frac{1}{\umax},\quad\text{for $\umax \geq x_k$},\\
+					0, \quad\text{otherwise.}
+				\end{cases}\]
+			\item Therefore, \[
+					\Prob{x_1, x_2 \ldots x_K \given \umax} 
+					= \begin{cases}
+						\frac{1}{\umax},\quad\text{for $\umax \geq \max(x_{1:K})$},\\
+					0, \quad\text{otherwise.}
+					\end{cases}\]
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Posterior of the Upper Bound}
+		\begin{itemize}
+			\item Assuming a uniform (improper) prior on $\umax$, the posterior is obtained by normalizing the likelihood function.
+			\item This leads to a posterior distribution 
+				\[
+					\Prob{\umax \given x_1, x_2 \ldots x_K} = \frac{\alpha x_0^\alpha}{\umax^{\alpha+1}},
+				\]
+				which is a \emph{Pareto} distribution with shape parameter $\alpha=K-1$ and scale parameter $x_0 =  \max(x_{1:K})$.
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Inference in Poisson models}
+		\begin{itemize}
+			\item The Poisson distribution can be used to model the rare occurrences in fixed intervals.
+			\item If $x$ is a Poisson random variable with rate $\lambda$, then 
+				\[\Prob{x = k \given \lambda} = \frac{\lambda^k e^{-\lambda}}{k!}.\]
+		\end{itemize}
+		\input{poisson.distribution.tex}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Inference in Poisson models}
+		\begin{itemize}
+			\item Let's say that the number of emails I get per hour, in $n=10$ hours, is 
+				\[D = 6, 8, 12,  7, 11, 14, 10, 12, 11, 16.\]
+			\item We can assume that these frequencies are generated according to a Poisson process with rate $\lambda$ per hour.
+			\item Given this assumption and this observed data, what is the probable value of $\lambda$?
+			\item In other words, what is 
+				\[
+					\Prob{\lambda \given D}?
+				\]
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Likelihood of a Poisson model}
+		\begin{itemize}
+			\item Given a known value for $\lambda$, the probability of $x_1, x_2 \cdots x_n$ is 
+				\begin{align*}
+					\Prob{x_1, x_2 \cdots x_n \given \lambda} &= \prod_{i=1}^n \Prob{x_i \given \lambda},\\
+					&= \prod_{i=1}^n \frac{\lambda^{x_i}e^{-\lambda}}{x_i!},\\
+					&\propto e^{-n\lambda}\prod_{i=1}^n \lambda^{x_i} = e^{-n\lambda} \lambda^{\sum_{i=1}^{n}x_i}.\\
+					\intertext{When $D = x_1, x_2 \cdots x_n = 6, 8 \cdots 16$, the likelihood of $\lambda$ is}
+					\Prob{D \given \lambda} &= e^{-n\lambda} \lambda^{S},
+				\end{align*}
+				where $S = \sum_{i=1}^{n} x_i = 107$.
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Likelihood of a Poisson model}
+		\input{poisson.likelihood.tex}
+
+		The likelihood of $\lambda$ given the sufficient statistics $S=107$ and $n=10$.
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Conjugate prior for the Poisson model}
+		\begin{itemize}
+			\item The Gamma distribution with shape $\kappa$ and scale $\theta$ is a conjugate prior for the Poisson model:
+				\[
+					\textrm{Gamma}(\lambda \given \kappa, \theta) = \frac{\lambda^{\kappa-1} e^{-\lambda/\theta}}{\theta^\kappa \Gamma(\kappa)}.
+				\]
+		\end{itemize}
+
+		\hspace*{-5mm}
+		\input{gamma.distributions.tex}
+
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Posterior distribution}
+		\begin{itemize}
+	
+			\item With the Poisson likelihood, the Gamma prior leads to 
+				\begin{align*}
+					\Prob{\lambda\given D, \kappa,\theta} &\propto  e^{-n\lambda} \lambda^{S} \times \frac{\lambda^{\kappa-1} e^{-\lambda/\theta}}{\theta^\kappa \Gamma(\kappa)},\\
+					&\propto e^{-\lambda\left(n+\tfrac{1}{\theta}\right)} \lambda^{S + \kappa - 1}.
+				\end{align*}
+				Given that 
+				\begin{align*}
+					\int e^{-\lambda\left(n+\tfrac{1}{\theta}\right)} \lambda^{S + \kappa - 1}\ d\lambda = \left(n + \tfrac{1}{\theta}\right)^{-(S+\kappa)}\Gamma(S+\kappa),
+				\end{align*}
+				we have
+				\[
+					\Prob{\lambda\given D, \kappa,\theta} = \textrm{Gamma}(\lambda \given S+\kappa, (n + \tfrac{1}{\theta})^{-1}).
+				\]
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Posterior distribution}
+		\begin{itemize}
+	
+			\item With prior hyper-parameters of $\kappa=1.0$, $\theta=100.0$, and sufficient statistics of $S=107$ and $n=10$, we have Gamma distribution with shape $108$ and scale $\approx 0.1$
+		\end{itemize}
+
+		\hspace*{-5mm}
+		\input{gamma.posterior}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Summarizing the posterior}
+		\begin{itemize}
+		\item The mean, variance and modes of any Gamma distribution with shape $\kappa$ and scale $\theta$ are as follows:
+			\begin{align*}
+				\langle \lambda \rangle &= \kappa\theta,\\
+				\mathrm{V}(\lambda) &= \kappa\theta^2,\\
+				\textrm{mode}(\lambda) &= (\kappa-1)\theta.
+			\end{align*}
+		\item Thus in our case, we have
+			\begin{align*}
+				\langle \lambda \rangle &= 108.0,\\
+				\mathrm{V}(\lambda) &= 1.08, \quad\textrm{sd}(\theta) = 1.04,\\
+				\textrm{mode}(\lambda) &= 10.69.
+			\end{align*}
+		\end{itemize}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{The 0.95 \hpd interval}
+
+		\input{gamma.posterior.hpd}
+
+		The 0.95 \hpd interval is from $8.78$ to $12.86$.
+		
+	\end{frame}
+
+	\begin{frame}
+
+		\frametitle{Posterior predictive distribution}
+
+		\begin{itemize}
+			\item Given that the number of emails every hour were
+				\[D = 6, 8, 12,  7, 11, 14, 10, 12, 11, 16,\]
+				what do we predict will be number of emails in the next hour?
+			\item This is given by the posterior predictive distribution:
+				\begin{align*}
+					\Prob{x_{\textrm{next}}= k \given D, \kappa, \theta} &= \int \Prob{x_{\textrm{next}} = k \given \lambda}\Prob{\lambda\given D, \kappa, \theta} d\lambda,\\
+					&= \int \frac{e^{-k}\lambda^k}{k!} \times \frac{(n+\tfrac{1}{\theta})^{S+\kappa}}{\Gamma(S+\kappa)} e^{-\lambda(n+\tfrac{1}{\theta})} \lambda^{S+\kappa-1},\\
+					&= \frac{\Gamma(S+\kappa+k)}{\Gamma(S+\kappa)\Gamma(k+1)} q^{k} (1-q)^{S+\kappa} ,\\
+					&= \textrm{NegativeBinomial}(k\given S+\kappa, q),
+				\end{align*}
+				with $q = \left(n+\tfrac{1}{\theta} + 1\right)^{-1}$. 
+
+		\end{itemize}
+
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Posterior predictive distribution}
+		\begin{itemize}
+			\item The negative binomial distribution gives the number of ``successes'' until a predefined number $r$ of ``failures'' have occurred, with the probability of a success being $q$.
+			\item The mean and variance of the negative binomial are \[\langle k \rangle = \frac{qr}{1-q}, \quad  V(k) = \frac{qr}{(1-q)^2}. \]
+			\item In our case, $r=S+\kappa=108$ and $q=\left(n+\tfrac{1}{\theta} + 1\right)^{-1} = \left(10+\tfrac{1}{100} + 1\right)^{-1} = 0.091$.
+			\item The mean and variance of the negative binomial are 
+				\[\langle k \rangle = \frac{S+\kappa}{n+\tfrac{1}{\theta}} = 10.79, \quad  V(k) = \frac{S+\kappa}{n+\tfrac{1}{\theta}} (n + \frac{1}{\theta} + 1) = 11.87. \]
+		\end{itemize}
+	\end{frame}
+
+
+	\begin{frame}
+		\frametitle{Posterior predictive distribution}
+
+		\hspace*{-5mm}
+		\input{poisson.posterior.predictive}
+
+		The posterior predictive distribution $\Prob{x_{\textrm{next}}=k\given D, \kappa, \theta}$ is a negative binomial distribution with $r=108$, $q=0.091$.
+	\end{frame}
+
+\end{document}
