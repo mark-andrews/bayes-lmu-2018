@@ -79,7 +79,7 @@ plot.beta <- function(filename, alpha, beta, y.label='$\\mathrm{P}(\\theta)$'){
 }
 ##################################################################
 
-source('../code/utils/beta.hpd.R')
+source('../../code/utils/beta.hpd.R')
 
 beta.plot.hpd <- function(filename, alpha, beta, y.label='$\\mathrm{P}(\\theta)$'){
   
@@ -245,7 +245,7 @@ mtext('$\\textrm{P}(\\lambda\\vert D)$', side=2, line=3.0)
 
 dev.off()
 
-source('../code/utils/gamma.R')
+source('../../code/utils/gamma.R')
 
 tikz(file='gamma.posterior.hpd.tex',
      standAlone=F,
@@ -389,8 +389,8 @@ mtext('$\\textrm{P}(x=k\\vert \\lambda)$', side=2, line=4)
 
 dev.off()
 
-source('../code/utils/normal.data.R')
-source('../code/utils/normal.R')
+source('../../code/utils/normal.data.R')
+source('../../code/utils/normal.R')
 
 tikz(file='normal.likelihood.tex',
      standAlone=F,
@@ -422,8 +422,8 @@ mtext('$\\sigma$', side=2, line=4)
 dev.off()
 
 ########################################################################
-source('../code/utils/normal.R')
-source('../code/utils/invgamma.R')
+source('../../code/utils/normal.R')
+source('../../code/utils/invgamma.R')
 tikz(file='scaled.inv.chisq.tex',
      standAlone=F,
      width = beamer.parms$paperwidth * 0.9, 
