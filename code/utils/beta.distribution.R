@@ -39,6 +39,11 @@ beta.plot.hpd <- function(alpha, beta){
   
 }
 
+# Make it easy to plot a posterior Beta
+beta_posterior_hpd_plot <- function(m, n, alpha, beta){
+  beta.plot.hpd(m + alpha, n - m + beta)
+}
+
 # Also shows the hpd interval.
 beta.plot.hpd.2 <- function(alpha, beta){
   

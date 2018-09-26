@@ -15,6 +15,10 @@ beta.summary <- function(alpha, beta){
   )
 }
 
+beta_posterior_summary <- function(m, n, alpha, beta){
+  beta.summary(m + alpha, n - m + beta)
+}
+
 beta.hpd.interval <- function(alpha, beta){
   # This will break if either alpha < 1.0 or beta < 1.0
   # or alpha = beta = 1.0

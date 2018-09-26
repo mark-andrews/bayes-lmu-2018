@@ -36,7 +36,8 @@ M_bayes <- brm(y ~ x_1 + x_2,
                iter = 2500,
                warmup = 1000, # these are initilization etc iterations
                prior = set_prior('normal(0, 100)'), # flat prior on coefs
-               seed = 101011 # for reproducibility
+               seed = 101011, # for reproducibility
+               save_all_pars = T # needed for bayes_factor
 )
 
 
@@ -71,7 +72,16 @@ prior_summary(M_bayes)
 # ------ Model comparison ----------
 
 # Set up a null model
-M_bayes_null <- brm(y ~ x_1, data=Df)
+M_bayes_null <- brm(y ~ x_1, 
+                    data=Df,
+                    cores = 2, # I have a dual-core
+                    chains = 4, # 4 chains is typical
+                    iter = 2500,
+                    warmup = 1000, # these are initilization etc iterations
+                    prior = set_prior('normal(0, 100)'), # flat prior on coefs
+                    seed = 101013, # for reproducibility
+                    save_all_pars = T
+)
 
 # Calculate and compare WAIC scores
 waic(M_bayes_null, M_bayes)
@@ -80,17 +90,5 @@ waic(M_bayes_null, M_bayes)
 loo(M_bayes_null, M_bayes)
 
 # ------ Bayes factors ---------
-# To be honest, I am not a fan of Bayes factors.
-# The reason why is a long story, however.
-# Of course, others see them as the sine qua non of Bayesian methods.
 
-# We need to 'save_all_pars'
-M_bayes <- brm(y ~ x_1 + x_2, 
-               save_all_pars = TRUE,
-               data=Df)
-
-M_bayes_null <- brm(y ~ x_1, 
-                    save_all_pars = TRUE,
-                    data=Df)
-
-BF <- bayes_factor(M_bayes_null, M_bayes)
+BF <- bayes_factor(M_bayes_null, M_bayes, log = T)
